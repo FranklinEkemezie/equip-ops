@@ -1,0 +1,14 @@
+# Build artefacts
+/build/
+/bin/
+
+# Test and tool output
+*.log
+*.gcda
+*.gcno
+*.gcov
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store

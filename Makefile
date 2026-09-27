@@ -1,99 +1,57 @@
-CXX			:= g++
-CXXFLAGS	:= -std=c++23 -Wall -Wextra -g -I src
+PROJECT       := equip_ops
+CXX           ?= g++
+CPPFLAGS      := -Isrc
+WARNINGS      := -Wall -Wextra -Wpedantic
+STD           := -std=c++23
+DEBUG_FLAGS   := -O0 -g3
+RELEASE_FLAGS := -O3 -DNDEBUG
 
-BIN_DIR		:= bin
-BUILD_DIR	:= build
+BUILD_DIR     := build/debug
+RELEASE_DIR   := build/release
+APP           := $(BUILD_DIR)/$(PROJECT)
+RELEASE_APP   := $(RELEASE_DIR)/$(PROJECT)
+SOURCES       := $(wildcard src/*.cpp)
+TEST_SOURCES  := $(wildcard tests/unit/*Test.cpp)
+TESTS         := $(patsubst tests/unit/%.cpp,$(BUILD_DIR)/tests/%,$(TEST_SOURCES))
 
-PROJECT_NAME = equip_ops
+.DEFAULT_GOAL := build
 
-SRC_DIR		= src
-TEST_DIR	= tests
-APP_DIR		= app
+.PHONY: all build run test release sanitize format clean help
 
+all: build
 
-SOURCES		= $(wildcard src/*.cpp src/**/*.cpp)
-OBJECTS		= $(patsubst %.cpp,$(BIN_DIR)/%.o, $(SOURCES))
+build: $(APP)
 
-TESTS_SRC	= $(wildcard tests/*Test.cpp tests/**/*Test.cpp)
-TESTS		= $(patsubst %.cpp,$(BIN_DIR)/%, $(TESTS_SRC))
-
-LIBRARY		= $(BUILD_DIR)/lib$(PROJECT_NAME).a
-LIBRARY_SO	= $(patsubst %.a,%.so, $(LIBRARY))
-
-APP_SRC		= $(wildcard app/*.cpp app/**/*.cpp)
-APP_OBJECTS	= $(patsubst %.cpp,$(BIN_DIR)/%.o, $(APP_SRC))
-
-APP			= $(BUILD_DIR)/$(PROJECT_NAME)
-
-$(info LIBRARY=$(LIBRARY))
-$(info SOURCES=$(SOURCES))
-$(info OBJECTS=$(OBJECTS))
-$(info LIBRARY_SO=$(LIBRARY_SO))
-$(info TESTS=$(TESTS))
-
-all: $(LIBRARY) $(LIBRARY_SO) tests app
-
-app: $(APP_OBJECTS)
-	@echo ""
-	@echo "=============================================="
-	@echo " Building application: $(PROJECT_NAME)"
-	@echo "=============================================="
-	$(CXX) $(CXXFLAGS) $(APP_OBJECTS) $(LIBRARY) -o $(APP)
-	@echo ""
-	@echo "=============================================="
-	@echo " Running application..."
-	@echo "=============================================="
-	@echo ""
-	@./$(APP)
-
-bin/src/%.o: src/%.cpp
+$(APP): app/main.cpp $(SOURCES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(STD) $(WARNINGS) $(DEBUG_FLAGS) $(CPPFLAGS) $^ $(LDFLAGS) -o $@
 
-bin/tests/%: tests/%.cpp
+run: $(APP)
+	./$(APP)
+
+$(BUILD_DIR)/tests/%Test: tests/unit/%Test.cpp $(SOURCES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $< $(LIBRARY) -o $@
+	$(CXX) $(STD) $(WARNINGS) $(DEBUG_FLAGS) $(CPPFLAGS) $^ $(LDFLAGS) -o $@
 
-bin/app/%.o: app/%.cpp
+test: $(TESTS)
+	@set -e; for test in $(TESTS); do $$test; done
+
+release: $(RELEASE_APP)
+
+$(RELEASE_APP): app/main.cpp $(SOURCES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(STD) $(WARNINGS) $(RELEASE_FLAGS) $(CPPFLAGS) $^ $(LDFLAGS) -o $@
 
-$(LIBRARY): CXXFLAGS += -fPIC
-$(LIBRARY): build $(OBJECTS)
-	@echo ""
-	@echo "=== Building static library [$(LIBRARY)]: "
-	@echo ""
-	ar rcs $@ $(OBJECTS)
-	ranlib $@
-	@echo ""
-	@echo "========== Static Library Compiled ==========="
-	@echo ""
+sanitize:
+	$(MAKE) clean
+	$(MAKE) test DEBUG_FLAGS='-O1 -g3 -fsanitize=address,undefined -fno-omit-frame-pointer' \
+		LDFLAGS='-fsanitize=address,undefined'
 
-$(LIBRARY_SO): $(LIBRARY) $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -shared -o $@ $(OBJECTS)
-
-tests: $(TESTS)
-	@echo ""
-	@echo "=============================================="
-	@echo " Running tests"
-	@echo "=============================================="
-	@echo ""
-	@sh ./run_tests.sh
-	@echo "=============== Tests Passed ================="
-	@echo ""
-
-build:
-	@echo ""
-	@echo "=============================================="
-	@echo " Building project: $(PROJECT_NAME)"
-	@echo "=============================================="
-	@mkdir -p $(BUILD_DIR)
-	@mkdir -p $(BIN_DIR)
-	@echo ""
-
-
-.PHONY: clean
+format:
+	clang-format -i app/*.cpp src/*.cpp src/*.cppm tests/unit/*.cpp
 
 clean:
-	@rm -rf $(BIN_DIR) $(BUILD_DIR)
-	@echo "Cleaned build files."
+	rm -rf build bin
+
+help:
+	@printf '%s\n' 'Targets: build, run, test, release, sanitize, format, clean'
