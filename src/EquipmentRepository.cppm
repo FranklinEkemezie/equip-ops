@@ -1,0 +1,62 @@
+#ifndef __EquipmentRepository_cppm
+#define __EquipmentRepository_cppm
+
+#include <optional>
+#include <vector>
+
+#include "App.cppm"
+#include "Equipment.cppm"
+
+namespace EquipOps
+{
+
+
+    class EquipmentRepository
+    {
+
+
+        public:
+            EquipmentRepository(std::vector<Equipment>& equipment);
+
+            void registerEquipment(Equipment equipment) const;
+
+            Equipment& findEquipmentById(std::string_view id) const;
+            Equipment& findEquipmentByName(std::string_view name) const;
+
+            // Equipment data are heavily read, written and modified so a 
+            // reference is a natural choice for this
+            // Other "models" like Inspection and Maintenance are typically
+            // readonly with delete when the associated equipment is deleted
+
+            using EquipmentList = std::vector<std::reference_wrapper<Equipment>>;
+
+            EquipmentList findAllEquipment() const;
+            EquipmentList findAllEquipment(Equipment::Category category) const;
+            EquipmentList findAllEquipment(Equipment::Department department) const;
+            EquipmentList findAllEquipment(Equipment::Status status) const;
+            EquipmentList findAllEquipment(App::SearchFilter filter, int value) const;
+
+            std::optional<Equipment> removeEquipment(std::string_view equipmentId);
+            std::optional<Equipment> removeEquipment(Equipment equipment);
+
+            struct Summary
+            {
+                unsigned long 
+                    registeredCount,        // number of registered equipment items
+                    operationalCount,       // number currently operational
+                    maintenanceCount,       // number under maintenance
+                    unavailableCount,       // number unavailable
+                    attentionRequiredCount; // number requiring attention based on latest inspection
+            };
+
+            Summary getSummary() const;
+
+            static std::string summaryToString(Summary summary);
+
+
+        private:
+            std::vector<Equipment>& equipment;
+    };
+}
+
+#endif
