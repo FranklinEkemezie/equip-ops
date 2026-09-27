@@ -54,8 +54,9 @@ namespace EquipOps
 
         switch (status) {
             case 0: return OPERATIONAL;
-            case 1: return UNDER_MAINTENANCE;
-            case 2: return UNAVAILABLE;
+            case 1: return OUTSIDE_LIMITS;
+            case 2: return UNDER_MAINTENANCE;
+            case 3: return UNAVAILABLE;
         }
 
         throw std::logic_error { "Unkonwn equipment status" };
@@ -112,7 +113,7 @@ namespace EquipOps
 
     std::string Equipment::getName() const { return name; }
 
-    void Equipment::setName(std::string_view name) { name = name; }
+    void Equipment::setName(std::string_view name) { this->name = name; }
 
     Equipment::Category Equipment::getCategory() const { return category; }
 

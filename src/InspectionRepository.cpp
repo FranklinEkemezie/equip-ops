@@ -16,6 +16,15 @@ namespace EquipOps
 
     void InspectionRepository::recordInspection(Inspection inspection)
     {
+        try
+        {
+            equipmentRepository.findEquipmentById(inspection.getEquipmentId());
+        }
+        catch (const std::logic_error&)
+        {
+            throw std::invalid_argument { "Cannot record an inspection for unknown equipment" };
+        }
+
         inspections.push_back(inspection);
     }
 

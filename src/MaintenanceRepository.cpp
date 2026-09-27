@@ -17,6 +17,15 @@ namespace EquipOps
 
     void MaintenanceRepository::recordMaintenance(Maintenance maintenance)
     {
+        try
+        {
+            equipmentRepository.findEquipmentById(maintenance.getEquipmentId());
+        }
+        catch (const std::logic_error&)
+        {
+            throw std::invalid_argument { "Cannot record maintenance for unknown equipment" };
+        }
+
         this->maintenance.push_back(maintenance);
     }
 

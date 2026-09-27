@@ -100,8 +100,9 @@ namespace EquipOps
         {
             if (e->getId() == id)
             {
+                Equipment removed { *e };
                 equipment.erase(e);
-                return *e;
+                return removed;
             }
         }
 
@@ -139,14 +140,15 @@ namespace EquipOps
             registeredCount { findAllEquipment().size() },
             operationalCount { findAllEquipment(OPERATIONAL).size() },
             maintenanceCount { findAllEquipment(UNDER_MAINTENANCE).size() },
-            unavailableCount { findAllEquipment(UNAVAILABLE).size() };
+            unavailableCount { findAllEquipment(UNAVAILABLE).size() },
+            attentionRequiredCount { findAllEquipment(OUTSIDE_LIMITS).size() };
 
         return Summary {
-            registeredCount: registeredCount,
-            operationalCount: operationalCount,
-            maintenanceCount: maintenanceCount,
-            unavailableCount: unavailableCount,
-            attentionRequiredCount: registeredCount - (operationalCount + maintenanceCount)
+            .registeredCount = registeredCount,
+            .operationalCount = operationalCount,
+            .maintenanceCount = maintenanceCount,
+            .unavailableCount = unavailableCount,
+            .attentionRequiredCount = attentionRequiredCount
         };
     }
 

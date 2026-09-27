@@ -20,11 +20,12 @@ namespace EquipOps
     std::optional<Equipment> Database::deleteEquipment(std::string_view equipmentId)
     {
 
-        // Delete associated inspections and maintenance records
+        auto removed { equipmentData().removeEquipment(equipmentId) };
+        if (!removed.has_value()) return std::nullopt;
+
         inspectionsData().deleteAllInspections(equipmentId);
         maintenanceData().deleteAllMaintenance(equipmentId);
-
-        return equipmentData().removeEquipment(equipmentId);
+        return removed;
     }
 
     std::optional<Equipment> Database::deleteEquipment(Equipment equipment)

@@ -122,6 +122,7 @@ namespace EquipOps
         {
             Ui::printError(std::format(
                 "Failed to find equipment with ID: {}", equipmentId));
+            return;
         }
 
         Ui::printInfo(std::format(
