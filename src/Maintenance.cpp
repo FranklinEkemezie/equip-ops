@@ -77,11 +77,11 @@ namespace EquipOps
     std::string Maintenance::toString() const
     {
         return std::format(
-            "Equipment ID:      {}\n"
-            "Maintenance Type:  {}\n"
-            "Description:       {}\n"
-            "Status Before  Maintenance: {}\n"
-            "Status Bfter   Maintenance: {}\n",
+            "Equipment ID:              {}\n"
+            "Maintenance Type:          {}\n"
+            "Description:               {}\n"
+            "Status Before Maintenance: {}\n"
+            "Status After  Maintenance: {}\n",
 
             equipmentId,
             typeToString(type),
