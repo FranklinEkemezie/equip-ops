@@ -22,14 +22,14 @@ namespace EquipOps
 
             std::vector<Maintenance> findAllMaintenance() const;
             std::vector<Maintenance> findAllMaintenance(std::string_view equipmentId) const;
-            std::vector<Maintenance> findAllMaintenance(Equipment equipment) const;
+            std::vector<Maintenance> findAllMaintenance(const Equipment& equipment) const;
             std::vector<Maintenance> findAllMaintenance(Equipment::Category category) const;
             std::vector<Maintenance> findAllMaintenance(Equipment::Status status) const;
             std::vector<Maintenance> findAllMaintenance(Equipment::Department department) const;
             std::vector<Maintenance> findAllMaintenance(App::SearchFilter filter, int value) const;
 
             void deleteAllMaintenance(std::string_view equipmentId);
-            void deleteAllMaintenance(Equipment equipment);
+            void deleteAllMaintenance(const Equipment& equipment);
 
         private:
             std::vector<Maintenance>& maintenance;
@@ -37,3 +37,5 @@ namespace EquipOps
 
     };
 }
+
+#endif

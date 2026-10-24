@@ -20,7 +20,6 @@ namespace EquipOps
 
     std::optional<Equipment> Database::deleteEquipment(std::string_view equipmentId)
     {
-
         std::optional<Equipment> deletedEquipment { };
         for (auto &e : equipment)
         {
@@ -30,6 +29,7 @@ namespace EquipOps
                 break;
             }
         }
+
         if (! deletedEquipment) return std::nullopt;
 
         inspectionsData().deleteAllInspections(equipmentId);

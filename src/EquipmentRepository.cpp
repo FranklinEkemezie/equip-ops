@@ -14,6 +14,9 @@ namespace EquipOps
         equipment { equipment }
     {  };
 
+    /**
+     * @throws `std::invalid_argument` - An equipment with same identifier as the equipment to be inserted already exists
+     */
     void EquipmentRepository::registerEquipment(Equipment equipment) const
     {
         for (auto& e : this->equipment)
@@ -30,6 +33,9 @@ namespace EquipOps
         this->equipment.push_back(equipment);
     }
 
+    /**
+     * @throws `std::logic_error` - An equipment with the `id` is not found
+     */
     Equipment& EquipmentRepository::findEquipmentById(std::string_view id) const
     {
         for (auto& e : equipment)
@@ -40,6 +46,9 @@ namespace EquipOps
         throw std::logic_error { std::format("Failed to find equipment with ID: {}", id) };
     }
 
+    /**
+     * @throws `std::logic_error` - An equipment with the `id` is not found
+     */
     Equipment& EquipmentRepository::findEquipmentByName(std::string_view name) const
     {
         for (auto& e : equipment)

@@ -46,7 +46,7 @@ namespace EquipOps
         return result;
     }
 
-    std::vector<Maintenance> MaintenanceRepository::findAllMaintenance(Equipment equipment) const
+    std::vector<Maintenance> MaintenanceRepository::findAllMaintenance(const Equipment& equipment) const
     {
         return findAllMaintenance(equipment.getId());
     }
@@ -123,7 +123,7 @@ namespace EquipOps
         }
     }
 
-    void MaintenanceRepository::deleteAllMaintenance(Equipment equipment)
+    void MaintenanceRepository::deleteAllMaintenance(const Equipment& equipment)
     {
         deleteAllMaintenance(equipment.getId());
     }
