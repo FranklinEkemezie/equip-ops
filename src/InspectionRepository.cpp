@@ -112,6 +112,45 @@ namespace EquipOps
         throw std::logic_error { "Unknown search filter" };
     }
 
+    std::vector<Inspection> InspectionRepository::findLatestInspections(std::vector<Equipment::Status> status) const
+    {
+        std::vector<std::string> equipmentIds { };
+        std::vector<Inspection> result { };
+
+        for (int i { static_cast<int>(inspections.size() - 1ul) }; i >= 0; i--)
+        {
+            const auto& inspection { inspections[i] };
+
+            auto inspectionStatus { inspection.getEquipmentOperatingStatus() };
+            if (! inspectionStatus) continue;
+
+            bool equipmentIdInserted { false };
+            for (const auto& id : equipmentIds)
+            {
+                if (inspection.getEquipmentId() == id)
+                {
+                    equipmentIdInserted = true;
+                    break;
+                }
+            }
+
+            if (! equipmentIdInserted)
+            {
+                for (const auto& s : status)
+                {
+                    if (inspectionStatus.value() == s)
+                    {
+                        result.push_back(inspection);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+
     void InspectionRepository::deleteAllInspections(std::string_view equipmentId)
     {
         for (auto i { inspections.begin() }; i != inspections.end(); )   

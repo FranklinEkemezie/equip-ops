@@ -14,7 +14,6 @@ namespace EquipOps
     class EquipmentRepository
     {
 
-
         public:
             EquipmentRepository(std::vector<Equipment>& equipment);
 
@@ -37,23 +36,7 @@ namespace EquipOps
             EquipmentList findAllEquipment(Equipment::Status status) const;
             EquipmentList findAllEquipment(App::SearchFilter filter, int value) const;
 
-            std::optional<Equipment> removeEquipment(std::string_view equipmentId);
-            std::optional<Equipment> removeEquipment(Equipment equipment);
-
-            struct Summary
-            {
-                unsigned long 
-                    registeredCount,        // number of registered equipment items
-                    operationalCount,       // number currently operational
-                    maintenanceCount,       // number under maintenance
-                    unavailableCount,       // number unavailable
-                    attentionRequiredCount; // number requiring attention based on latest inspection
-            };
-
-            Summary getSummary() const;
-
-            static std::string summaryToString(Summary summary);
-
+            static void printEquipmentList(EquipmentList equipmentList);
 
         private:
             std::vector<Equipment>& equipment;

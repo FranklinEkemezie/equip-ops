@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "EquipmentRepository.cppm"
+#include "Ui.cppm"
 
 namespace EquipOps
 {
@@ -107,21 +108,9 @@ namespace EquipOps
         return result;
     }
 
-    std::optional<Equipment> EquipmentRepository::removeEquipment(std::string_view id)
-    {
-        for (auto e { equipment.begin() }; e != equipment.end(); e++)
-        {
-            if (e->getId() == id)
-            {
-                Equipment removed { *e };
-                equipment.erase(e);
-                return removed;
-            }
-        }
-
-        return std::nullopt;
-    }
-
+    /**
+     * @throws `std::logic_error` - The `filter` is not a valid `App::SearchFilter` enum case.
+     */
     EquipmentRepository::EquipmentList EquipmentRepository::findAllEquipment(
         App::SearchFilter filter, int value
     ) const
@@ -139,48 +128,32 @@ namespace EquipOps
         throw std::logic_error { "Unknown search filter" };
     }
 
-    std::optional<Equipment> EquipmentRepository::removeEquipment(Equipment equipment)
+    void EquipmentRepository::printEquipmentList(EquipmentList equipmentList)
     {
-        return removeEquipment(equipment.getId());
+        constexpr auto row_format { "| {:8} | {:16} | {:32} | {:24} | {:24} | {:24} |" };
+        const auto table_heading { std::format(row_format,
+            "S/N", "ID", "Name", "Category", "Department", "Status") };
+        const auto horizontal_border { std::format("{:-^{}}", "", table_heading.length()) };
+
+        Ui::println(horizontal_border);
+        Ui::println(table_heading);
+        Ui::println(horizontal_border);
+
+        for (size_t i { 0 }; i < equipmentList.size(); i++)
+        {
+            const auto& e { equipmentList[i].get() };
+
+            Ui::println(std::format(row_format, 
+                i + 1, 
+                e.getId(), 
+                e.getName(), 
+                e.getCategoryLabel(), 
+                e.getDepartmentLabel(), 
+                e.getStatusLabel()  
+            ));
+            Ui::println(horizontal_border);
+
+        }
     }
-
-    EquipmentRepository::Summary EquipmentRepository::getSummary() const
-    {
-
-        using enum Equipment::Status;
-
-        unsigned long 
-            registeredCount { findAllEquipment().size() },
-            operationalCount { findAllEquipment(OPERATIONAL).size() },
-            maintenanceCount { findAllEquipment(UNDER_MAINTENANCE).size() },
-            unavailableCount { findAllEquipment(UNAVAILABLE).size() },
-            attentionRequiredCount { findAllEquipment(OUTSIDE_LIMITS).size() };
-
-        return Summary {
-            .registeredCount = registeredCount,
-            .operationalCount = operationalCount,
-            .maintenanceCount = maintenanceCount,
-            .unavailableCount = unavailableCount,
-            .attentionRequiredCount = attentionRequiredCount
-        };
-    }
-
-    std::string EquipmentRepository::summaryToString(Summary summary)
-    {
-        return std::format(
-            "Registered:            {}\n"
-            "Operational:           {}\n"
-            "Under maintenance:     {}\n"
-            "Unavailable:           {}\n"
-            "Requires attention:    {}\n",
-
-            summary.registeredCount,
-            summary.operationalCount,
-            summary.maintenanceCount,
-            summary.unavailableCount,
-            summary.attentionRequiredCount
-        );
-    }
-
 
 }
