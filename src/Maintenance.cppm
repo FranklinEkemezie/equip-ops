@@ -1,5 +1,5 @@
-#ifndef __Maintenance_cppm
-#define __Maintenance_cppm
+#ifndef EQUIP_OPS_MAINTENANCE_CPPM
+#define EQUIP_OPS_MAINTENANCE_CPPM
 
 #include "Equipment.cppm"
 #include "EquipmentRepository.cppm"

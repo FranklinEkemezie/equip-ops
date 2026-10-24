@@ -1,5 +1,5 @@
-#ifndef __App_cppm
-#define __App_cppm
+#ifndef EQUIP_OPS_APP_CPPM
+#define EQUIP_OPS_APP_CPPM
 
 namespace EquipOps
 {
@@ -21,18 +21,11 @@ namespace EquipOps
                 CATEGORY,
                 STATUS,
                 DEPARTMENT,
-                NONE
-            };
-
-            struct SearchRequest
-            {
-                RecordType recordType;
-                SearchFilter searchFilter;
+                ALL
             };
 
             static RecordType recordTypeFromInt(int recordType);
             static SearchFilter searchFilterFromInt(int searchFilter);
-
 
     };
 }

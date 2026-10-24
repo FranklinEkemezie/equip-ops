@@ -1,5 +1,5 @@
-#ifndef __Inspection_cppm
-#define __Inspection_cppm
+#ifndef EQUIP_OPS_INSPECTION_CPPM
+#define EQUIP_OPS_INSPECTION_CPPM
 
 #include <optional>
 #include <string>
@@ -17,7 +17,7 @@ namespace EquipOps
             Inspection(std::string_view equipmentId);
 
             std::string getEquipmentId() const;
-            std::optional<Equipment> getEquipment(const EquipmentRepository& equipment) const;
+            std::optional<std::reference_wrapper<Equipment>> getEquipment(const EquipmentRepository& equipment) const;
 
             std::optional<float> getTemperature() const;
             void setTemperature(float temperature);

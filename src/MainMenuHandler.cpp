@@ -1,6 +1,7 @@
 #include <format>
 
 #include "MainMenuHandler.cppm"
+#include "Prompt.cppm"
 
 namespace EquipOps
 {
@@ -9,6 +10,9 @@ namespace EquipOps
     MainMenuHandler::MainMenuHandler(Database& db): db { db } { };
 
 
+    /**
+     * @throws `std::logic_error` - `option` is an unsupported menu option.
+     */
     void MainMenuHandler::handleMainMenuOption(Ui::Option option)
     {
         switch (static_cast<int>(option))
@@ -33,13 +37,31 @@ namespace EquipOps
 
         Ui::printHeading("Please enter equipment details");
 
-        Equipment e 
+        auto id         { Prompt::promptString("Equipment ID") };
+        auto name       { Prompt::promptString("Equipment Name") };
+        auto category   { Ui::promptEquipmentCategory() };
+        auto department { Ui::promptEquipmentDepartment() };
+        auto status     { Ui::promptEquipmentStatus() };
+
+        using enum Prompt::Status;
+
+        if (
+            id.status   == FAILURE || 
+            name.status == FAILURE || 
+            ! category || ! department || ! status
+        )
         {
-            Ui::promptString("Equipment ID"),
-            Ui::promptString("Equipment Name"),
-            Ui::promptEquipmentCategory(),
-            Ui::promptEquipmentDepartment(),
-            Ui::promptEquipmentStatus()
+            Ui::printError("An error occurred while registering equipment. Please try again");
+            return;
+        }
+
+        Equipment e 
+        { 
+            id.value, 
+            name.value, 
+            category.value(), 
+            department.value(), 
+            status.value() 
         };
 
         try 
@@ -56,8 +78,14 @@ namespace EquipOps
 
     void MainMenuHandler::handleViewEquipment()
     {
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong. Please try again");
+            return;
+        }
 
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { result.value };
 
         try
         {
@@ -76,46 +104,72 @@ namespace EquipOps
     void MainMenuHandler::handleSearchEquipment()
     {
         
-        auto equipmentName { Ui::promptString("Enter equipment name") };
-
-        try
+        auto result { Prompt::promptString("Enter equipment name") };
+        if (result.status == Prompt::Status::FAILURE)
         {
-            auto& e { db.equipmentData().findEquipmentByName(equipmentName) };
-
-            Ui::printInfo("Equipment found");
-            Ui::printnln(e.toString());
+            Ui::printError("Something went wrong. Please try again");
+            return;
         }
-        catch (const std::logic_error&)
+
+        auto equipmentName { result.value };
+
+        auto items { db.equipmentData().findAllEquipment(equipmentName) };
+        if (items.empty())
         {
             Ui::printError(std::format(
-                "Failed to find equipment with named: {}", equipmentName));
+                "Could not find any equipment with name: {}", equipmentName));
+            return;
         }
+
+        Ui::printError(std::format(
+            "Found {} equipment with name: {}", items.size(), equipmentName));
+
+        EquipmentRepository::printEquipmentList(items);
+        
     }
 
     void MainMenuHandler::handleUpdateEquipment()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { Prompt::promptString("Enter equipment ID") };
+        if (equipmentId.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
+
+        auto equipmentStatus { Ui::promptEquipmentStatus() };
+        if (! equipmentStatus)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
         try
         {
             db.equipmentData()
-                .findEquipmentById(equipmentId)
-                .setStatus(Ui::promptEquipmentStatus());
+                .findEquipmentById(equipmentId.value)
+                .setStatus(equipmentStatus.value());
 
             Ui::printInfo("Status updated successfully.");
         }
         catch (const std::logic_error&)
         {
             Ui::printError(std::format(
-                "Failed to find equipment with ID: {}", equipmentId));
+                "Failed to find equipment with ID: {}", equipmentId.value));
         }
         
     }
 
     void MainMenuHandler::handleRemoveEquipment()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
+        auto equipmentId { result.value };
         auto e { db.deleteEquipment(equipmentId) };
 
         if (! e.has_value())
@@ -132,20 +186,39 @@ namespace EquipOps
 
     void MainMenuHandler::handleRecordMaintenanceActivity()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { Prompt::promptString("Enter equipment ID") };
+        if (equipmentId.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
         try
         {
-            auto& e { db.equipmentData().findEquipmentById(equipmentId) };
+
+            auto& e { db.equipmentData().findEquipmentById(equipmentId.value) };
 
             Ui::printHeading("Please enter maintenance activity details");
+
+            auto maintenanceTypeOption { Ui::promptMaintenanceTypeOption() };
+            auto description { Prompt::promptString("Description") };
+            auto equipmentStatus { Ui::promptEquipmentStatus() };
+
+            if (
+                ! maintenanceTypeOption || ! equipmentStatus ||
+                description.status == Prompt::Status::FAILURE  
+            )
+            {
+                Ui::printError("Something went wrong");
+                return;
+            }
 
             Maintenance m
             {
                 e,
-                Ui::promptMaintenanceTypeOption(),
-                Ui::promptString("Description"),
-                Ui::promptEquipmentStatus()
+                maintenanceTypeOption.value(),
+                description.value,
+                equipmentStatus.value()
             };
 
             db.maintenanceData().recordMaintenance(m);
@@ -156,13 +229,22 @@ namespace EquipOps
         catch (const std::logic_error&)
         {
             Ui::printError(std::format(
-                "Failed to find equipment with ID: {}", equipmentId));
+                "Failed to find equipment with ID: {}", equipmentId.value));
         }
     }
 
     void MainMenuHandler::handleRecordEquipmentInspection()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        using enum Prompt::Status;
+
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
+
+        auto equipmentId { result.value };
 
         try
         {
@@ -171,16 +253,19 @@ namespace EquipOps
             Inspection inspection { e.getId() };
 
             Ui::printHeading("Please enter inspection records below");    
-            Ui::printInfo("You may enter '0' if inspection data is unavailable");
+            Ui::printInfo("Press 'Enter' to skip if inspection data is unavailable for the field");
 
-            auto temperature { Ui::promptFloat("Temperature") };
-            if (temperature != 0.0f) inspection.setTemperature(temperature);
+            auto temperature { Prompt::promptDouble("Temperature", false) };
+            if (temperature.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (temperature.status != EMPTY) inspection.setTemperature(temperature.value);
 
-            auto vibration { Ui::promptFloat("Vibration") };
-            if (vibration != 0.0f) inspection.setVibration(vibration);
+            auto vibration { Prompt::promptDouble("Vibration", false) };
+            if (vibration.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (vibration.status != EMPTY) inspection.setVibration(vibration.value);
 
-            auto operatingHours { Ui::promptInt("Operating Hours") };
-            if (operatingHours != 0) inspection.setOperatingHours(operatingHours);
+            auto operatingHours { Prompt::promptUInt("Operating Hours", false) };
+            if (operatingHours.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (operatingHours.status != EMPTY) inspection.setOperatingHours(operatingHours.value);
 
             db.inspectionsData().recordInspection(inspection);
 
@@ -201,52 +286,72 @@ namespace EquipOps
     {
 
         auto recordType { Ui::promptRecordType("Which record do you want to search?") };
+        if (! recordType)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
-        switch (recordType)
+        switch (recordType.value())
         {
             using enum App::RecordType;
 
             case EQUIPMENT:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter equipment records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter equipment records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.equipmentData().findAllEquipment(searchFilter, value) };
 
                 if (result.empty()) return Ui::printInfo("No equipment record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} equipment records", result.size()));
-                Ui::printnl();
-
-                for (const auto& e : result) Ui::println(e.get().toString());
+                EquipmentRepository::printEquipmentList(result);
+                
                 return;
             }
 
             case INSPECTION:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter inspection records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter inspection records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.inspectionsData().findAllInspections(searchFilter, value) };
 
                 if (result.empty()) return Ui::printInfo("No inspection record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} inspection records", result.size()));
-                Ui::printnl();
-
                 for (const auto& i : result) Ui::println(i.toString());
+
                 return;
             }
             case MAINTENANCE:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter maintenance records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter maintenance records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.maintenanceData().findAllMaintenance(searchFilter, value) };
             
                 if (result.empty()) return Ui::printInfo("No maintenance record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} maintenance records", result.size()));
-                Ui::printnl();
-
                 for (const auto& m : result) Ui::println(m.toString());
+
                 return;
             }
         }
@@ -256,13 +361,12 @@ namespace EquipOps
 
     void MainMenuHandler::handleDisplayInventorySummary()
     {
-        Ui::printEquipmentSummary(db.equipmentData().getSummary());
+        Ui::printnln(db.summaryToString(db.getSummary()));
     }
 
     void MainMenuHandler::handleExitApplication()
     {
         Ui::printInfo("Exiting application. Bye!");
-        exit(EXIT_SUCCESS);
     }
 
 

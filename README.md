@@ -4,7 +4,7 @@ A C++23 console application for registering workshop equipment, recording mainte
 
 ## Requirements
 
-- A C++23-capable compiler (the project is tested with `g++`)
+- A C++23-capable compiler with `<print>` support (the project is tested with `g++` 14+)
 - GNU Make
 
 ## Build and run

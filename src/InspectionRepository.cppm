@@ -1,5 +1,5 @@
-#ifndef __InspectionRepository_cppm
-#define __InspectionRepository_cppm
+#ifndef EQUIP_OPS_INSPECTION_REPOSITORY_CPPM
+#define EQUIP_OPS_INSPECTION_REPOSITORY_CPPM
 
 #include <vector>
 
@@ -13,7 +13,6 @@ namespace EquipOps
     class InspectionRepository
     {
 
-
         public:
             InspectionRepository(
                 std::vector<Inspection>& inspections,
@@ -24,15 +23,16 @@ namespace EquipOps
 
             std::vector<Inspection> findAllInspections() const;
             std::vector<Inspection> findAllInspections(std::string_view equipmentId) const;
-            std::vector<Inspection> findAllInspections(Equipment equipment) const;
+            std::vector<Inspection> findAllInspections(const Equipment& equipment) const;
             std::vector<Inspection> findAllInspections(Equipment::Category category) const;
             std::vector<Inspection> findAllInspections(Equipment::Status status) const;
             std::vector<Inspection> findAllInspections(Equipment::Department department) const;
             std::vector<Inspection> findAllInspections(App::SearchFilter filter, int value) const;
 
-            void deleteAllInspections(std::string_view equipmentId);
-            void deleteAllInspections(Equipment equipment);
+            std::vector<Inspection> findLatestInspections(std::vector<Equipment::Status> status) const;
 
+            void deleteAllInspections(std::string_view equipmentId);
+            void deleteAllInspections(const Equipment& equipment);
            
         private:
             std::vector<Inspection>& inspections;

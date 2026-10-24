@@ -10,9 +10,10 @@ namespace EquipOps
     { };
 
     std::string Inspection::getEquipmentId() const { return equipmentId; };
-    std::optional<Equipment> Inspection::getEquipment(const EquipmentRepository& equipment) const 
+    std::optional<std::reference_wrapper<Equipment>> Inspection::getEquipment(const EquipmentRepository& equipment) const 
     {
-        return equipment.findEquipmentById(equipmentId);
+        try { return equipment.findEquipmentById(equipmentId); }
+        catch(const std::exception& e) { return std::nullopt; }
     }
 
     std::optional<float> Inspection::getTemperature() const { return temperature; }
@@ -57,8 +58,6 @@ namespace EquipOps
 
     std::string Inspection::toString() const
     {
-        std::string buffer { };
-
         return std::format(
             "Equipment ID:      {}\n"
             "Temperature:       {}\n"

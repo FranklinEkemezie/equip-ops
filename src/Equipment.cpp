@@ -1,5 +1,6 @@
 #include <format>
 #include <iostream>
+#include <stdexcept>
 
 #include "Equipment.cppm"
 
@@ -59,7 +60,7 @@ namespace EquipOps
             case 3: return UNAVAILABLE;
         }
 
-        throw std::logic_error { "Unkonwn equipment status" };
+        throw std::logic_error { "Unknown equipment status" };
 
     }
 

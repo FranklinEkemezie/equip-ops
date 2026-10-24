@@ -45,7 +45,7 @@ namespace EquipOps
         return result;
     }
 
-    std::vector<Inspection> InspectionRepository::findAllInspections(Equipment equipment) const
+    std::vector<Inspection> InspectionRepository::findAllInspections(const Equipment& equipment) const
     {
         return findAllInspections(equipment.getId());
     }
@@ -59,7 +59,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getCategory() == category) result.push_back(i);
+            if (e.value().get().getCategory() == category) result.push_back(i);
         }
 
         return result; 
@@ -74,7 +74,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getStatus() == status) result.push_back(i);
+            if (e.value().get().getStatus() == status) result.push_back(i);
         }
 
         return result; 
@@ -89,7 +89,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getDepartment() == department) result.push_back(i);
+            if (e.value().get().getDepartment() == department) result.push_back(i);
         }
 
         return result; 
@@ -106,11 +106,50 @@ namespace EquipOps
             case CATEGORY:      return findAllInspections(Equipment::categoryFromInt(value));
             case STATUS:        return findAllInspections(Equipment::statusFromInt(value));
             case DEPARTMENT:    return findAllInspections(Equipment::departmentFromInt(value));
-            case NONE:          return findAllInspections();
+            case ALL:           return findAllInspections();
         }
 
         throw std::logic_error { "Unknown search filter" };
     }
+
+    std::vector<Inspection> InspectionRepository::findLatestInspections(std::vector<Equipment::Status> status) const
+    {
+        std::vector<std::string> equipmentIds { };
+        std::vector<Inspection> result { };
+
+        for (int i { static_cast<int>(inspections.size() - 1ul) }; i >= 0; i--)
+        {
+            const auto& inspection { inspections[i] };
+
+            auto inspectionStatus { inspection.getEquipmentOperatingStatus() };
+            if (! inspectionStatus) continue;
+
+            bool equipmentIdInserted { false };
+            for (const auto& id : equipmentIds)
+            {
+                if (inspection.getEquipmentId() == id)
+                {
+                    equipmentIdInserted = true;
+                    break;
+                }
+            }
+
+            if (! equipmentIdInserted)
+            {
+                for (const auto& s : status)
+                {
+                    if (inspectionStatus.value() == s)
+                    {
+                        result.push_back(inspection);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
 
     void InspectionRepository::deleteAllInspections(std::string_view equipmentId)
     {
@@ -121,7 +160,7 @@ namespace EquipOps
         }
     }
 
-    void InspectionRepository::deleteAllInspections(Equipment equipment)
+    void InspectionRepository::deleteAllInspections(const Equipment& equipment)
     {
         deleteAllInspections(equipment.getId());
     }

@@ -1,15 +1,34 @@
-#include <format>
 #include <iostream>
 #include <limits>
+#include <print>
 #include <stdexcept>
 
+#include "Prompt.cppm"
 #include "Ui.cppm"
 
 namespace EquipOps
 {
 
-    Ui::Ui() { };
 
+    void Ui::print(std::string_view text)
+    {
+        std::print("{}", text);
+    }
+
+    void Ui::printnl()
+    {
+        std::println();
+    }
+
+    void Ui::println(std::string_view text)
+    {
+        std::println("{}", text);
+    }
+
+    void Ui::printnln(std::string_view text)
+    {
+        std::println("\n{}\n", text);
+    }
 
     void Ui::printMessage(std::string_view label, std::string_view message)
     {
@@ -26,59 +45,9 @@ namespace EquipOps
         printMessage("ERROR", message);
     }
 
-    void Ui::printnl()
-    {
-        std::cout << '\n';
-    }
-
-    void Ui::println(std::string_view text)
-    {
-        std::cout << text << '\n';
-    }
-
-    void Ui::printnln(std::string_view text)
-    {
-        std::cout << '\n' << text << '\n';
-    }
-
     void Ui::printHeading(std::string_view text)
     {
-        std::cout << std::format("=== {}", text) << std::endl;
-    }
-
-    void Ui::showPrompt(std::string_view label)
-    {
-        std::cout << std::format("{}: ", label);
-    }
-
-    std::string Ui::promptString(std::string_view label)
-    {
-        showPrompt(label);
-
-        std::string buffer { };
-        getline(std::cin, buffer);
-
-        return buffer;
-    }
-
-    float Ui::promptFloat(std::string_view label)
-    {
-        while (true)
-        {
-            try { return std::stof(promptString(label)); }
-            catch (const std::invalid_argument&) { printError("Invalid input"); }
-            catch (const std::out_of_range&) { printError("Input is too large"); }
-        }
-    }
-
-    int Ui::promptInt(std::string_view label)
-    {
-        while (true)
-        {
-            try { return std::stoi(promptString(label)); }
-            catch (const std::invalid_argument&) { printError("Invalid input"); }
-            catch (const std::out_of_range&) { printError("Input is too large"); }
-        }
+        std::println("=== {}", text);
     }
 
     Ui::Option Ui::getOption(int option)
@@ -94,11 +63,16 @@ namespace EquipOps
         return static_cast<Option>(option);
     }
 
-    Ui::Option Ui::promptOption(std::string_view label)
+    std::optional<Ui::Option> Ui::promptMainMenuOption(std::string_view label)
     {
         while (true)
         {
-            try { return getOption(promptInt(label)); }
+            try {
+                auto result { Prompt::promptInt(label) };
+                if (result.status == Prompt::Status::FAILURE) return std::nullopt;
+
+                return getOption(result.value);
+            }
             catch (const std::out_of_range&) { printError("Invalid option."); }
         }
     }
@@ -113,27 +87,33 @@ namespace EquipOps
         showMenu(MAIN_MENU);
     }
 
-    Ui::Option Ui::getMainMenuOption()
+    std::optional<Ui::Option> Ui::getMainMenuOption()
     {
         showMainMenu();
 
-        return promptOption("Choose option");
+        return promptMainMenuOption("Choose option");
     }
 
-    App::RecordType Ui::promptRecordType(std::string_view label)
+    std::optional<App::RecordType> Ui::promptRecordType(std::string_view label)
     {
         printnln(RECORD_TYPE_MENU);
 
-        return App::recordTypeFromInt(static_cast<int>(promptOption(label)) - 1);
+        auto result { promptMainMenuOption(label) };
+        if (! result) return std::nullopt;
+
+        return App::recordTypeFromInt(static_cast<int>(result.value()) - 1);
     }
 
-    std::pair<App::SearchFilter, int> Ui::promptSearchFilter(std::string_view label)
+    std::optional<std::pair<App::SearchFilter, int>> Ui::promptSearchFilter(std::string_view label)
     {
         printnln(SEARCH_FILTER_MENU);
 
-        auto option { static_cast<int>(promptOption(label)) };
+        auto result { promptMainMenuOption(label) };
+        if (! result) return std::nullopt;
+
+        auto option { static_cast<int>(result.value()) };
         auto searchFilterInt { option != 0 ? option - 1 
-            : static_cast<int>(App::SearchFilter::NONE) };
+            : static_cast<int>(App::SearchFilter::ALL) };
     
         auto searchFilter { App::searchFilterFromInt(searchFilterInt) };
 
@@ -141,25 +121,31 @@ namespace EquipOps
         {
             using enum App::SearchFilter;
 
-            case CATEGORY: 
-                return { 
-                    searchFilter, 
-                    static_cast<int>(promptEquipmentCategory()) 
-                };
+            case CATEGORY:
+            {
+                auto categoryOption { promptEquipmentCategory() };
+                if (! categoryOption) return std::nullopt;
+
+                return std::pair { searchFilter, static_cast<int>(categoryOption.value()) };
+            }
         
             case STATUS:
-                return {
-                    searchFilter,
-                    static_cast<int>(promptEquipmentStatus())
-                };
+            {
+                auto statusOption { promptEquipmentStatus() };
+                if (! statusOption) return std::nullopt;
+
+                return std::pair { searchFilter, static_cast<int>(statusOption.value()) };
+            }
 
             case DEPARTMENT:
-                return {
-                    searchFilter,
-                    static_cast<int>(promptEquipmentDepartment())
-                };
+            {
+                auto departmentOption { promptEquipmentDepartment() };
+                if (! departmentOption) return std::nullopt;
 
-            case NONE: return { searchFilter, 0 };
+                return std::pair { searchFilter, static_cast<int>(departmentOption.value()) };
+            }
+
+            case ALL: return std::pair { searchFilter, 0 };
         }
 
         throw std::logic_error { "Unknown search filter" };
@@ -185,6 +171,9 @@ namespace EquipOps
         showMenu(MAINTENANCE_TYPE_MENU);
     }
 
+    /**
+     * @throws: `std::logic_error` - `option` does not match any `Equipment::Category` enum case
+     */
     Equipment::Category Ui::getEquipmentCategoryOption(Option option)
     {
         switch (static_cast<int>(option))
@@ -200,6 +189,9 @@ namespace EquipOps
         throw std::logic_error { "Unknown equipment category option" };
     }
 
+    /**
+     * @throws: `std::logic_error` - `option` does not match any `Equipment::Status` enum case
+     */
     Equipment::Status Ui::getEquipmentStatusOption(Option option)
     {
         switch (static_cast<int>(option))
@@ -215,6 +207,9 @@ namespace EquipOps
         throw std::logic_error { "Unknown equipment status option" };
     }
 
+    /**
+     * @throws: `std::logic_error` - `option` does not match any `Equipment::Department` enum case
+     */
     Equipment::Department Ui::getEquipmentDepartmentOption(Option option)
     {
         switch (static_cast<int>(option))
@@ -230,6 +225,9 @@ namespace EquipOps
         throw std::logic_error { "Unknown equipment department option" };
     }
 
+    /**
+     * @throws: `std::logic_error` - `option` does not match any `Maintenance::Type` enum case
+     */
     Maintenance::Type Ui::getMaintenanceTypeOption(Option option)
     {
         switch (static_cast<int>(option))
@@ -247,7 +245,7 @@ namespace EquipOps
     }
 
 
-    Equipment::Category Ui::promptEquipmentCategory()
+    std::optional<Equipment::Category> Ui::promptEquipmentCategory()
     {
         showEquipmentCategoryMenu();
 
@@ -255,8 +253,10 @@ namespace EquipOps
         {
             try 
             { 
-                return getEquipmentCategoryOption(
-                    promptOption("Choose equipment category"));
+                auto result { promptMainMenuOption("Choose equipment category") };
+                if (! result) return std::nullopt;
+
+                return getEquipmentCategoryOption(result.value());
             }
             catch (const std::logic_error&) 
             {
@@ -265,7 +265,7 @@ namespace EquipOps
         }
     }
 
-    Equipment::Status Ui::promptEquipmentStatus()
+    std::optional<Equipment::Status> Ui::promptEquipmentStatus()
     {
         showEquipmentStatusMenu();
 
@@ -273,8 +273,10 @@ namespace EquipOps
         {
             try 
             {
-                return getEquipmentStatusOption(
-                    promptOption("Choose equipment status"));
+                auto result { promptMainMenuOption("Choose equipment status") };
+                if (! result) return std::nullopt;
+
+                return getEquipmentStatusOption(result.value());
             }
             catch (const std::logic_error&) 
             { 
@@ -283,25 +285,27 @@ namespace EquipOps
         }
     }
 
-    Equipment::Department Ui::promptEquipmentDepartment()
+    std::optional<Equipment::Department> Ui::promptEquipmentDepartment()
     {
         showEquipmentDepartmentMenu();
 
         while (true)
         {
             try 
-            { 
-                return getEquipmentDepartmentOption(
-                    promptOption("Choose equipment department"));
+            {
+                auto result { promptMainMenuOption("Choose equipment department") };
+                if (! result) return std::nullopt;
+
+                return getEquipmentDepartmentOption(result.value());
             }
-            catch (const std::invalid_argument&) 
+            catch (const std::logic_error&) 
             {
                 printError("Invalid equipment department");
             }
         }
     }
 
-    Maintenance::Type Ui::promptMaintenanceTypeOption()
+    std::optional<Maintenance::Type> Ui::promptMaintenanceTypeOption()
     {
         showMaintenanceTypeOption();
 
@@ -309,19 +313,16 @@ namespace EquipOps
         {
             try
             {
-                return getMaintenanceTypeOption(
-                    promptOption("Choose maintenance type"));
+                auto result { promptMainMenuOption("Choose maintenance type") };
+                if (! result) return std::nullopt;
+
+                return getMaintenanceTypeOption(result.value());
             }
-            catch (const std::invalid_argument&)
+            catch (const std::logic_error&)
             {
                 printError("Invalid maintenance type");
             }
         }
-    }
-
-    void Ui::printEquipmentSummary(EquipmentRepository::Summary summary)
-    {
-        printnln(EquipmentRepository::summaryToString(summary));
     }
 
     

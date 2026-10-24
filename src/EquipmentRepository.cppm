@@ -1,5 +1,5 @@
-#ifndef __EquipmentRepository_cppm
-#define __EquipmentRepository_cppm
+#ifndef EQUIP_OPS_EQUIPMENT_REPOSITORY_CPPM
+#define EQUIP_OPS_EQUIPMENT_REPOSITORY_CPPM
 
 #include <optional>
 #include <vector>
@@ -13,7 +13,6 @@ namespace EquipOps
 
     class EquipmentRepository
     {
-
 
         public:
             EquipmentRepository(std::vector<Equipment>& equipment);
@@ -31,28 +30,13 @@ namespace EquipOps
             using EquipmentList = std::vector<std::reference_wrapper<Equipment>>;
 
             EquipmentList findAllEquipment() const;
+            EquipmentList findAllEquipment(std::string name) const;
             EquipmentList findAllEquipment(Equipment::Category category) const;
             EquipmentList findAllEquipment(Equipment::Department department) const;
             EquipmentList findAllEquipment(Equipment::Status status) const;
             EquipmentList findAllEquipment(App::SearchFilter filter, int value) const;
 
-            std::optional<Equipment> removeEquipment(std::string_view equipmentId);
-            std::optional<Equipment> removeEquipment(Equipment equipment);
-
-            struct Summary
-            {
-                unsigned long 
-                    registeredCount,        // number of registered equipment items
-                    operationalCount,       // number currently operational
-                    maintenanceCount,       // number under maintenance
-                    unavailableCount,       // number unavailable
-                    attentionRequiredCount; // number requiring attention based on latest inspection
-            };
-
-            Summary getSummary() const;
-
-            static std::string summaryToString(Summary summary);
-
+            static void printEquipmentList(EquipmentList equipmentList);
 
         private:
             std::vector<Equipment>& equipment;

@@ -1,5 +1,5 @@
-#ifndef __Equipment_cppm
-#define __Equipment_cppm
+#ifndef EQUIP_OPS_EQUIPMENT_CPPM
+#define EQUIP_OPS_EQUIPMENT_CPPM
 
 #include <string>
 
@@ -77,7 +77,6 @@ namespace EquipOps
             Category category;
             Department department;
             Status status;
-            // Relevant operating information???
     };
 }
 

@@ -46,7 +46,7 @@ namespace EquipOps
         return result;
     }
 
-    std::vector<Maintenance> MaintenanceRepository::findAllMaintenance(Equipment equipment) const
+    std::vector<Maintenance> MaintenanceRepository::findAllMaintenance(const Equipment& equipment) const
     {
         return findAllMaintenance(equipment.getId());
     }
@@ -107,7 +107,7 @@ namespace EquipOps
             case CATEGORY:      return findAllMaintenance(Equipment::categoryFromInt(value));
             case STATUS:        return findAllMaintenance(Equipment::statusFromInt(value));
             case DEPARTMENT:    return findAllMaintenance(Equipment::departmentFromInt(value));
-            case NONE:          return findAllMaintenance();
+            case ALL:           return findAllMaintenance();
         }
 
         throw std::logic_error { "Unknown search filter" };
@@ -123,7 +123,7 @@ namespace EquipOps
         }
     }
 
-    void MaintenanceRepository::deleteAllMaintenance(Equipment equipment)
+    void MaintenanceRepository::deleteAllMaintenance(const Equipment& equipment)
     {
         deleteAllMaintenance(equipment.getId());
     }

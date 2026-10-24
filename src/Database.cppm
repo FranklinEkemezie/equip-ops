@@ -1,5 +1,5 @@
-#ifndef __Database_cppm
-#define __Database_cppm
+#ifndef EQUIP_OPS_DATABASE_CPPM
+#define EQUIP_OPS_DATABASE_CPPM
 
 #include <vector>
 
@@ -24,7 +24,19 @@ namespace EquipOps
             MaintenanceRepository& maintenanceData();
 
             std::optional<Equipment> deleteEquipment(std::string_view equipmentId);
-            std::optional<Equipment> deleteEquipment(Equipment equipment);
+
+            struct Summary
+            {
+                unsigned long 
+                    registeredCount,        // number of registered equipment items
+                    operationalCount,       // number currently operational
+                    maintenanceCount,       // number under maintenance
+                    unavailableCount,       // number unavailable
+                    attentionRequiredCount; // number requiring attention based on latest inspection
+            };
+
+            Summary getSummary() const;
+            static std::string summaryToString(Summary summary);
 
         private:
             std::vector<Equipment> equipment;

@@ -1,5 +1,5 @@
-#ifndef __MainMenuHandler_cppm
-#define __MainMenuHandler_cppm
+#ifndef EQUIP_OPS_MAIN_MENU_HANDLER_CPPM
+#define EQUIP_OPS_MAIN_MENU_HANDLER_CPPM
 
 #include "App.cppm"
 #include "Database.cppm"
