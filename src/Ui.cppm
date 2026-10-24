@@ -18,31 +18,25 @@ namespace EquipOps
 
             using Option = std::byte;
 
-            Ui();
-
-            static void printMessage(std::string_view label, std::string_view message);
-            static void printInfo(std::string_view message);
-            static void printError(std::string_view message);
-
+            static void print(std::string_view text);
             static void printnl();
             static void println(std::string_view text);
             static void printnln(std::string_view text);
             static void printHeading(std::string_view text);
 
-            static void showPrompt(std::string_view label);
-            static std::string promptString(std::string_view label);
-            static float promptFloat(std::string_view label);
-            static int promptInt(std::string_view label);
+            static void printMessage(std::string_view label, std::string_view message);
+            static void printInfo(std::string_view message);
+            static void printError(std::string_view message);
 
             static Option getOption(int option);
-            static Option promptOption(std::string_view label);
+            static std::optional<Option> promptMainMenuOption(std::string_view label);
             static void showMenu(std::string_view menu);
 
             static void showMainMenu();
-            static Option getMainMenuOption();
+            static std::optional<Option> getMainMenuOption();
 
-            static App::RecordType promptRecordType(std::string_view label);
-            static std::pair<App::SearchFilter, int> promptSearchFilter(std::string_view label);
+            static std::optional<App::RecordType> promptRecordType(std::string_view label);
+            static std::optional<std::pair<App::SearchFilter, int>> promptSearchFilter(std::string_view label);
 
             static void showEquipmentCategoryMenu();
             static void showEquipmentStatusMenu();
@@ -58,15 +52,13 @@ namespace EquipOps
             // Just like the methods above, the methods below couple `Ui` and
             // `Employee` classes tightly. But...
 
-            static Equipment::Category promptEquipmentCategory();
-            static Equipment::Status promptEquipmentStatus();
-            static Equipment::Department promptEquipmentDepartment();
+            static std::optional<Equipment::Category> promptEquipmentCategory();
+            static std::optional<Equipment::Status> promptEquipmentStatus();
+            static std::optional<Equipment::Department> promptEquipmentDepartment();
 
             static void showMaintenanceTypeOption();
             static Maintenance::Type getMaintenanceTypeOption(Option option);
-            static Maintenance::Type promptMaintenanceTypeOption();
-
-            static void printEquipmentSummary(EquipmentRepository::Summary summary);
+            static std::optional<Maintenance::Type> promptMaintenanceTypeOption();
 
         private:
 
@@ -138,3 +130,5 @@ namespace EquipOps
     };
 
 }
+
+#endif
