@@ -78,8 +78,14 @@ namespace EquipOps
 
     void MainMenuHandler::handleViewEquipment()
     {
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong. Please try again");
+            return;
+        }
 
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { result.value };
 
         try
         {
@@ -98,46 +104,72 @@ namespace EquipOps
     void MainMenuHandler::handleSearchEquipment()
     {
         
-        auto equipmentName { Ui::promptString("Enter equipment name") };
-
-        try
+        auto result { Prompt::promptString("Enter equipment name") };
+        if (result.status == Prompt::Status::FAILURE)
         {
-            auto& e { db.equipmentData().findEquipmentByName(equipmentName) };
-
-            Ui::printInfo("Equipment found");
-            Ui::printnln(e.toString());
+            Ui::printError("Something went wrong. Please try again");
+            return;
         }
-        catch (const std::logic_error&)
+
+        auto equipmentName { result.value };
+
+        auto items { db.equipmentData().findAllEquipment(equipmentName) };
+        if (items.empty())
         {
             Ui::printError(std::format(
-                "Failed to find equipment with named: {}", equipmentName));
+                "Could not find any equipment with name: {}", equipmentName));
+            return;
         }
+
+        Ui::printError(std::format(
+            "Found {} equipment with name: {}", items.size(), equipmentName));
+
+        EquipmentRepository::printEquipmentList(items);
+        
     }
 
     void MainMenuHandler::handleUpdateEquipment()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { Prompt::promptString("Enter equipment ID") };
+        if (equipmentId.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
+
+        auto equipmentStatus { Ui::promptEquipmentStatus() };
+        if (! equipmentStatus)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
         try
         {
             db.equipmentData()
-                .findEquipmentById(equipmentId)
-                .setStatus(Ui::promptEquipmentStatus());
+                .findEquipmentById(equipmentId.value)
+                .setStatus(equipmentStatus.value());
 
             Ui::printInfo("Status updated successfully.");
         }
         catch (const std::logic_error&)
         {
             Ui::printError(std::format(
-                "Failed to find equipment with ID: {}", equipmentId));
+                "Failed to find equipment with ID: {}", equipmentId.value));
         }
         
     }
 
     void MainMenuHandler::handleRemoveEquipment()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
+        auto equipmentId { result.value };
         auto e { db.deleteEquipment(equipmentId) };
 
         if (! e.has_value())
