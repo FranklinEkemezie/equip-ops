@@ -286,52 +286,72 @@ namespace EquipOps
     {
 
         auto recordType { Ui::promptRecordType("Which record do you want to search?") };
+        if (! recordType)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
-        switch (recordType)
+        switch (recordType.value())
         {
             using enum App::RecordType;
 
             case EQUIPMENT:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter equipment records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter equipment records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.equipmentData().findAllEquipment(searchFilter, value) };
 
                 if (result.empty()) return Ui::printInfo("No equipment record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} equipment records", result.size()));
-                Ui::printnl();
-
-                for (const auto& e : result) Ui::println(e.get().toString());
+                EquipmentRepository::printEquipmentList(result);
+                
                 return;
             }
 
             case INSPECTION:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter inspection records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter inspection records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.inspectionsData().findAllInspections(searchFilter, value) };
 
                 if (result.empty()) return Ui::printInfo("No inspection record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} inspection records", result.size()));
-                Ui::printnl();
-
                 for (const auto& i : result) Ui::println(i.toString());
+
                 return;
             }
             case MAINTENANCE:
             {
-                auto [searchFilter, value] { Ui::promptSearchFilter("Filter maintenance records by") };
+                auto searchFilterResult { Ui::promptSearchFilter("Filter maintenance records by") };
+                if (! searchFilterResult)
+                {
+                    Ui::printError("Something went wrong");
+                    return;
+                }
+
+                auto [searchFilter, value] { searchFilterResult.value() };
                 auto result { db.maintenanceData().findAllMaintenance(searchFilter, value) };
             
                 if (result.empty()) return Ui::printInfo("No maintenance record found");
 
-                Ui::printnl();
                 Ui::printnln(std::format("Found {} maintenance records", result.size()));
-                Ui::printnl();
-
                 for (const auto& m : result) Ui::println(m.toString());
+
                 return;
             }
         }
@@ -341,13 +361,12 @@ namespace EquipOps
 
     void MainMenuHandler::handleDisplayInventorySummary()
     {
-        Ui::printEquipmentSummary(db.equipmentData().getSummary());
+        Ui::printnln(db.summaryToString(db.getSummary()));
     }
 
     void MainMenuHandler::handleExitApplication()
     {
         Ui::printInfo("Exiting application. Bye!");
-        exit(EXIT_SUCCESS);
     }
 
 
