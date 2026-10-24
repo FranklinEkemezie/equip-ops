@@ -1,6 +1,7 @@
 #include <format>
 
 #include "MainMenuHandler.cppm"
+#include "Prompt.cppm"
 
 namespace EquipOps
 {
@@ -9,6 +10,9 @@ namespace EquipOps
     MainMenuHandler::MainMenuHandler(Database& db): db { db } { };
 
 
+    /**
+     * @throws `std::logic_error` - `option` is an unsupported menu option.
+     */
     void MainMenuHandler::handleMainMenuOption(Ui::Option option)
     {
         switch (static_cast<int>(option))
@@ -33,13 +37,31 @@ namespace EquipOps
 
         Ui::printHeading("Please enter equipment details");
 
-        Equipment e 
+        auto id         { Prompt::promptString("Equipment ID") };
+        auto name       { Prompt::promptString("Equipment Name") };
+        auto category   { Ui::promptEquipmentCategory() };
+        auto department { Ui::promptEquipmentDepartment() };
+        auto status     { Ui::promptEquipmentStatus() };
+
+        using enum Prompt::Status;
+
+        if (
+            id.status   == FAILURE || 
+            name.status == FAILURE || 
+            ! category || ! department || ! status
+        )
         {
-            Ui::promptString("Equipment ID"),
-            Ui::promptString("Equipment Name"),
-            Ui::promptEquipmentCategory(),
-            Ui::promptEquipmentDepartment(),
-            Ui::promptEquipmentStatus()
+            Ui::printError("An error occurred while registering equipment. Please try again");
+            return;
+        }
+
+        Equipment e 
+        { 
+            id.value, 
+            name.value, 
+            category.value(), 
+            department.value(), 
+            status.value() 
         };
 
         try 
