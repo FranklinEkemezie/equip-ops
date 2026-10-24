@@ -253,16 +253,19 @@ namespace EquipOps
             Inspection inspection { e.getId() };
 
             Ui::printHeading("Please enter inspection records below");    
-            Ui::printInfo("You may enter '0' if inspection data is unavailable");
+            Ui::printInfo("Press 'Enter' to skip if inspection data is unavailable for the field");
 
-            auto temperature { Ui::promptFloat("Temperature") };
-            if (temperature != 0.0f) inspection.setTemperature(temperature);
+            auto temperature { Prompt::promptDouble("Temperature", false) };
+            if (temperature.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (temperature.status != EMPTY) inspection.setTemperature(temperature.value);
 
-            auto vibration { Ui::promptFloat("Vibration") };
-            if (vibration != 0.0f) inspection.setVibration(vibration);
+            auto vibration { Prompt::promptDouble("Vibration", false) };
+            if (vibration.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (vibration.status != EMPTY) inspection.setVibration(vibration.value);
 
-            auto operatingHours { Ui::promptInt("Operating Hours") };
-            if (operatingHours != 0) inspection.setOperatingHours(operatingHours);
+            auto operatingHours { Prompt::promptUInt("Operating Hours", false) };
+            if (operatingHours.status == FAILURE) { Ui::printError("Something went wrong"); return; }
+            if (operatingHours.status != EMPTY) inspection.setOperatingHours(operatingHours.value);
 
             db.inspectionsData().recordInspection(inspection);
 
