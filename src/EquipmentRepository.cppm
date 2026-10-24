@@ -1,5 +1,5 @@
-#ifndef __EquipmentRepository_cppm
-#define __EquipmentRepository_cppm
+#ifndef EQUIP_OPS_EQUIPMENT_REPOSITORY_CPPM
+#define EQUIP_OPS_EQUIPMENT_REPOSITORY_CPPM
 
 #include <optional>
 #include <vector>

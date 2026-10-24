@@ -1,5 +1,5 @@
-#ifndef __Database_cppm
-#define __Database_cppm
+#ifndef EQUIP_OPS_DATABASE_CPPM
+#define EQUIP_OPS_DATABASE_CPPM
 
 #include <vector>
 

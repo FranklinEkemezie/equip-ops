@@ -1,5 +1,5 @@
-#ifndef __Inspection_cppm
-#define __Inspection_cppm
+#ifndef EQUIP_OPS_INSPECTION_CPPM
+#define EQUIP_OPS_INSPECTION_CPPM
 
 #include <optional>
 #include <string>

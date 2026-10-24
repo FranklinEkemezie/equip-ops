@@ -1,5 +1,5 @@
-#ifndef __InspectionRepository_cppm
-#define __InspectionRepository_cppm
+#ifndef EQUIP_OPS_INSPECTION_REPOSITORY_CPPM
+#define EQUIP_OPS_INSPECTION_REPOSITORY_CPPM
 
 #include <vector>
 

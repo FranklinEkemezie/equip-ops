@@ -1,3 +1,6 @@
+#ifndef EQUIP_OPS_UI_CPPM
+#define EQUIP_OPS_UI_CPPM
+
 #include <string>
 
 #include "App.cppm"

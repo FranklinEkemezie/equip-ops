@@ -1,5 +1,5 @@
-#ifndef __App_cppm
-#define __App_cppm
+#ifndef EQUIP_OPS_APP_CPPM
+#define EQUIP_OPS_APP_CPPM
 
 namespace EquipOps
 {

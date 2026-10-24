@@ -1,3 +1,6 @@
+#ifndef EQUIP_OPS_MAINTENANCE_REPOSITORY_CPPM
+#define EQUIP_OPS_MAINTENANCE_REPOSITORY_CPPM
+
 #include <vector>
 
 #include "App.cppm"
