@@ -58,6 +58,19 @@ namespace EquipOps
         return result;
     }
 
+    EquipmentRepository::EquipmentList EquipmentRepository::findAllEquipment(std::string name) const 
+    {
+        EquipmentList result { };
+
+        for (auto& e : equipment)
+        {
+            if (e.getName() == name) result.push_back(std::ref(e));
+        }
+
+        return result;   
+    }
+
+
     EquipmentRepository::EquipmentList EquipmentRepository::findAllEquipment(Equipment::Category category) const
     {
         EquipmentList result { };
@@ -120,7 +133,7 @@ namespace EquipOps
             case CATEGORY:      return findAllEquipment(Equipment::categoryFromInt(value));
             case STATUS:        return findAllEquipment(Equipment::statusFromInt(value));
             case DEPARTMENT:    return findAllEquipment(Equipment::departmentFromInt(value));
-            case NONE:          return findAllEquipment();
+            case ALL:           return findAllEquipment();
         };
 
         throw std::logic_error { "Unknown search filter" };

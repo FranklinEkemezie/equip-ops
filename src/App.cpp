@@ -28,7 +28,7 @@ namespace EquipOps
             case 0: return CATEGORY;
             case 1: return STATUS;
             case 2: return DEPARTMENT;
-            case 3: return NONE;
+            case 3: return ALL;
         }
 
         throw std::logic_error { "Unknown search filter" };

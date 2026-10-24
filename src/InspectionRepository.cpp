@@ -106,7 +106,7 @@ namespace EquipOps
             case CATEGORY:      return findAllInspections(Equipment::categoryFromInt(value));
             case STATUS:        return findAllInspections(Equipment::statusFromInt(value));
             case DEPARTMENT:    return findAllInspections(Equipment::departmentFromInt(value));
-            case NONE:          return findAllInspections();
+            case ALL:           return findAllInspections();
         }
 
         throw std::logic_error { "Unknown search filter" };

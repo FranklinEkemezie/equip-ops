@@ -21,18 +21,11 @@ namespace EquipOps
                 CATEGORY,
                 STATUS,
                 DEPARTMENT,
-                NONE
-            };
-
-            struct SearchRequest
-            {
-                RecordType recordType;
-                SearchFilter searchFilter;
+                ALL
             };
 
             static RecordType recordTypeFromInt(int recordType);
             static SearchFilter searchFilterFromInt(int searchFilter);
-
 
     };
 }

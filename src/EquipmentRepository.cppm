@@ -31,6 +31,7 @@ namespace EquipOps
             using EquipmentList = std::vector<std::reference_wrapper<Equipment>>;
 
             EquipmentList findAllEquipment() const;
+            EquipmentList findAllEquipment(std::string name) const;
             EquipmentList findAllEquipment(Equipment::Category category) const;
             EquipmentList findAllEquipment(Equipment::Department department) const;
             EquipmentList findAllEquipment(Equipment::Status status) const;
