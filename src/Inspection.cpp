@@ -57,8 +57,6 @@ namespace EquipOps
 
     std::string Inspection::toString() const
     {
-        std::string buffer { };
-
         return std::format(
             "Equipment ID:      {}\n"
             "Temperature:       {}\n"
