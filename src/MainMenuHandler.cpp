@@ -186,20 +186,39 @@ namespace EquipOps
 
     void MainMenuHandler::handleRecordMaintenanceActivity()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        auto equipmentId { Prompt::promptString("Enter equipment ID") };
+        if (equipmentId.status == Prompt::Status::FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
 
         try
         {
-            auto& e { db.equipmentData().findEquipmentById(equipmentId) };
+
+            auto& e { db.equipmentData().findEquipmentById(equipmentId.value) };
 
             Ui::printHeading("Please enter maintenance activity details");
+
+            auto maintenanceTypeOption { Ui::promptMaintenanceTypeOption() };
+            auto description { Prompt::promptString("Description") };
+            auto equipmentStatus { Ui::promptEquipmentStatus() };
+
+            if (
+                ! maintenanceTypeOption || ! equipmentStatus ||
+                description.status == Prompt::Status::FAILURE  
+            )
+            {
+                Ui::printError("Something went wrong");
+                return;
+            }
 
             Maintenance m
             {
                 e,
-                Ui::promptMaintenanceTypeOption(),
-                Ui::promptString("Description"),
-                Ui::promptEquipmentStatus()
+                maintenanceTypeOption.value(),
+                description.value,
+                equipmentStatus.value()
             };
 
             db.maintenanceData().recordMaintenance(m);
@@ -210,13 +229,22 @@ namespace EquipOps
         catch (const std::logic_error&)
         {
             Ui::printError(std::format(
-                "Failed to find equipment with ID: {}", equipmentId));
+                "Failed to find equipment with ID: {}", equipmentId.value));
         }
     }
 
     void MainMenuHandler::handleRecordEquipmentInspection()
     {
-        auto equipmentId { Ui::promptString("Enter equipment ID") };
+        using enum Prompt::Status;
+
+        auto result { Prompt::promptString("Enter equipment ID") };
+        if (result.status == FAILURE)
+        {
+            Ui::printError("Something went wrong");
+            return;
+        }
+
+        auto equipmentId { result.value };
 
         try
         {
