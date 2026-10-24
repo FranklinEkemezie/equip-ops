@@ -45,7 +45,7 @@ namespace EquipOps
         return result;
     }
 
-    std::vector<Inspection> InspectionRepository::findAllInspections(Equipment equipment) const
+    std::vector<Inspection> InspectionRepository::findAllInspections(const Equipment& equipment) const
     {
         return findAllInspections(equipment.getId());
     }
@@ -59,7 +59,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getCategory() == category) result.push_back(i);
+            if (e.value().get().getCategory() == category) result.push_back(i);
         }
 
         return result; 
@@ -74,7 +74,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getStatus() == status) result.push_back(i);
+            if (e.value().get().getStatus() == status) result.push_back(i);
         }
 
         return result; 
@@ -89,7 +89,7 @@ namespace EquipOps
             const auto& e { i.getEquipment(equipmentRepository) };
 
             if (! e.has_value()) continue;
-            if (e.value().getDepartment() == department) result.push_back(i);
+            if (e.value().get().getDepartment() == department) result.push_back(i);
         }
 
         return result; 
@@ -121,7 +121,7 @@ namespace EquipOps
         }
     }
 
-    void InspectionRepository::deleteAllInspections(Equipment equipment)
+    void InspectionRepository::deleteAllInspections(const Equipment& equipment)
     {
         deleteAllInspections(equipment.getId());
     }

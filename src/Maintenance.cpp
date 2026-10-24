@@ -66,7 +66,8 @@ namespace EquipOps
     std::string Maintenance::getEquipmentId() const { return equipmentId; }
     std::optional<Equipment> Maintenance::getEquipment(const EquipmentRepository& equipmentRepository) const
     {
-        return equipmentRepository.findEquipmentById(equipmentId);
+        try { return equipmentRepository.findEquipmentById(equipmentId); }
+        catch (const std::logic_error&) { return std::nullopt; }
     }
 
     Maintenance::Type Maintenance::getType() const { return type; }

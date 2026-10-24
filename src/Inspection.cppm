@@ -17,7 +17,7 @@ namespace EquipOps
             Inspection(std::string_view equipmentId);
 
             std::string getEquipmentId() const;
-            std::optional<Equipment> getEquipment(const EquipmentRepository& equipment) const;
+            std::optional<std::reference_wrapper<Equipment>> getEquipment(const EquipmentRepository& equipment) const;
 
             std::optional<float> getTemperature() const;
             void setTemperature(float temperature);
