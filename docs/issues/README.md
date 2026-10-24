@@ -3,6 +3,8 @@
 Offline copy of the **open** issues (mirrors GitHub — see each section's link).
 Re-run the repro before closing anything; checked boxes are not proof of a fix.
 
+Integration PR: [#11](https://github.com/FranklinEkemezie/equip-ops/pull/11). Hold merge until #8 and #9 are fixed.
+
 ## Build and reproduce
 
 ```sh
