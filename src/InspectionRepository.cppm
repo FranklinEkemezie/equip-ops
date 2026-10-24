@@ -13,7 +13,6 @@ namespace EquipOps
     class InspectionRepository
     {
 
-
         public:
             InspectionRepository(
                 std::vector<Inspection>& inspections,

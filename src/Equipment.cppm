@@ -77,7 +77,6 @@ namespace EquipOps
             Category category;
             Department department;
             Status status;
-            // Relevant operating information???
     };
 }
 
