@@ -23,7 +23,6 @@ Each equipment record should contain information sufficient to identify and desc
 - Equipment category.
 - Department/location.
 - Operational status.
-- Relevant operating information.
 
 The system must allow the operator to:
 
@@ -52,7 +51,9 @@ Equipment must be inspectable.
 
 An inspection may record several measurements, but some measurements may be absent depending on the equipment being inspected.
 
-- [x] The system must be able to determine whether the recorded inspection indicates that the equipment is operating within its defined limits.
+- [x] The system must be able to determine whether the recorded inspection indicates that the equipment is operating within defined limits.
+
+The inspection thresholds are defined globally for the workshop: a temperature above 80 °C or a vibration above 5 mm/s places the equipment outside its limits. An equipment must have run for at least 2 operating hours to be considered available; a recorded value below that minimum marks it unavailable. Absent measurements do not affect the result.
 
 ### Searching and Reporting
 
@@ -65,6 +66,8 @@ The operator must be able to search the workshop inventory and obtain useful inf
 - Operational status.
 - Department.
 
+Equipment identifiers are unique and are looked up directly by identifier (menu option 2). The inventory filter covers category, operational status, and department.
+
 - [x] The system should also provide summary information such as:
 
 - Number of registered equipment items.
@@ -72,6 +75,8 @@ The operator must be able to search the workshop inventory and obtain useful inf
 - Number under maintenance.
 - Number unavailable.
 - Number requiring attention based on their latest inspection.
+
+An equipment requires attention when its latest usable inspection reports `OUTSIDE_LIMITS` or `UNAVAILABLE`. Equipment with no usable inspection is not counted.
 
 ### User Interface
 
